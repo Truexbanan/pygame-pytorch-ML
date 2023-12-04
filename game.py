@@ -10,7 +10,7 @@ pygame.init()
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
 PLAYER_WIDTH, PLAYER_HEIGHT = 50, 50
 OBJECT_WIDTH, OBJECT_HEIGHT = 50, 50
-PLAYER_SPEED = 8
+PLAYER_SPEED = 5    
 OBJECT_MIN_SPEED, OBJECT_MAX_SPEED = 3, 10
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -26,12 +26,14 @@ class Player:
         self.speed = PLAYER_SPEED
         self.direction = 1  # 1 for right, -1 for left
 
+    def move(self, x_change, y_change):
+        self.x += x_change
+        self.y += y_change
+        self.x = max(0, min(SCREEN_WIDTH - self.width, self.x))
+        self.y = max(0, min(SCREEN_HEIGHT - self.height, self.y))
+
     def change_direction(self):
         self.direction *= -1
-
-    def move(self):
-        self.x += self.direction * self.speed
-        self.x = max(0, min(SCREEN_WIDTH - self.width, self.x))
 
     def draw(self, screen):
         pygame.draw.rect(screen, BLACK, [self.x, self.y, self.width, self.height])
@@ -65,24 +67,38 @@ def main():
     # Object setup
     objects = []
     start_time = time.time()
-
+    
     # Game loop
     running = True
     clock = pygame.time.Clock()
+    x_change = 0
+    y_change = 0
+
 
     while running:
         screen.fill(WHITE)
 
-        # Event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    player.change_direction()
+                if event.key == pygame.K_a:  # Left
+                    x_change = -PLAYER_SPEED
+                elif event.key == pygame.K_d:  # Right
+                    x_change = PLAYER_SPEED
+                elif event.key == pygame.K_w:  # Up
+                    y_change = -PLAYER_SPEED
+                elif event.key == pygame.K_s:  # Down
+                    y_change = PLAYER_SPEED
+            elif event.type == pygame.KEYUP:
+                if event.key in [pygame.K_a, pygame.K_d]:
+                    x_change = 0
+                if event.key in [pygame.K_w, pygame.K_s]:
+                    y_change = 0
 
         # Update player position
-        player.move()
+        player.move(x_change, y_change)
+
 
         # Update objects
         for obj in objects:
