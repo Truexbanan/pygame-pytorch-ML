@@ -2,10 +2,11 @@ import pygame
 import random
 import time
 
+
 # Initialize Pygame
 pygame.init()
 
-# Constants
+# Constants                   
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
 PLAYER_WIDTH, PLAYER_HEIGHT = 50, 50
 OBJECT_WIDTH, OBJECT_HEIGHT = 50, 50
@@ -13,6 +14,7 @@ PLAYER_SPEED = 8
 OBJECT_MIN_SPEED, OBJECT_MAX_SPEED = 3, 10
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+RED = (255,0,0)
 FONT = pygame.font.SysFont(None, 36)
 
 class Player:
@@ -47,7 +49,7 @@ class Object:
         self.y += self.speed
 
     def draw(self, screen):
-        pygame.draw.rect(screen, BLACK, [self.x, self.y, OBJECT_WIDTH, OBJECT_HEIGHT])
+        pygame.draw.rect(screen, RED, [self.x, self.y, OBJECT_WIDTH, OBJECT_HEIGHT])
 
     def get_rect(self):
         return pygame.Rect(self.x, self.y, OBJECT_WIDTH, OBJECT_HEIGHT)
@@ -104,7 +106,7 @@ def main():
         player_rect = player.get_rect()
         for obj in objects:
             if player_rect.colliderect(obj.get_rect()):
-                running = True #False  # End the game on collision
+                running =  False  # End the game on collision
 
         # Calculate score (time survived)
         score = time.time() - start_time
