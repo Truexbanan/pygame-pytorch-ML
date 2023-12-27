@@ -2,7 +2,6 @@ import pygame
 import random
 import time
 
-
 # Initialize Pygame
 pygame.init()
 
@@ -11,13 +10,11 @@ SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
 PLAYER_WIDTH, PLAYER_HEIGHT = 50, 50
 OBJECT_WIDTH, OBJECT_HEIGHT = 50, 50
 PLAYER_SPEED = 5
-OBJECT_MIN_SPEED, OBJECT_MAX_SPEED = 3, 5  # Initial speed range
+OBJECT_MIN_SPEED, OBJECT_MAX_SPEED = 3, 5
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 FONT = pygame.font.SysFont(None, 36)
-
-score_multiplier = 1
 
 class Player:
     def __init__(self, x, y):
@@ -57,84 +54,56 @@ class Object:
     def get_rect(self):
         return pygame.Rect(self.x, self.y, OBJECT_WIDTH, OBJECT_HEIGHT)
 
-def main():
-    global OBJECT_MIN_SPEED, OBJECT_MAX_SPEED, score_multiplier
-    # Set up the display
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Game")
+class GameAI:
+    def __init__(self):
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        pygame.display.set_caption("Game")
+        self.clock = pygame.time.Clock()
+        self.reset()
 
-    # Player setup
-    player = Player(SCREEN_WIDTH // 2, SCREEN_HEIGHT - PLAYER_HEIGHT - 10)
+    def reset(self):
+        self.player = Player(SCREEN_WIDTH // 2, SCREEN_HEIGHT - PLAYER_HEIGHT - 10)
+        self.objects = []
+        self.score = 0
+        self.start_time = time.time()
+        self.running = True
 
-    # Object setup
-    objects = []
-    start_time = time.time()
+    def play_step(self, action):
+        if not self.running:
+            self.reset()
 
-    # Game loop
-    running = True
-    clock = pygame.time.Clock()
+        if action == 1:
+            self.player.change_direction()
 
-    score = 0
+        self.player.move()
 
-    while running:
-        screen.fill(WHITE)
-
-        # Event handling
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    player.change_direction()
-
-        # Update player position
-        player.move()
-
-        # Update objects
-        for obj in objects:
+        for obj in self.objects:
             obj.update()
 
-        # Add new object
-        elapsed_time = time.time() - start_time
-        # Decrease spawn threshold over time to increase spawn rate
+        reward = 0
+        game_over = False
+        player_rect = self.player.get_rect()
+        for obj in self.objects:
+            if player_rect.colliderect(obj.get_rect()):
+                game_over = True
+                reward = -10
+                break
+
+        self.score += 1
+        elapsed_time = time.time() - self.start_time
         spawn_threshold = max(10, 30 - int(elapsed_time / 20))
         if random.randint(1, spawn_threshold) == 1:
-            objects.append(Object())
+            self.objects.append(Object())
 
-        # Gradual increase in object speed
-        OBJECT_MIN_SPEED = min(7, 3 + int(elapsed_time / 60))
-        OBJECT_MAX_SPEED = min(10, 5 + int(elapsed_time / 45))
+        self._update_ui()
+        return reward, game_over, self.score
 
-        # Draw player
-        player.draw(screen)
-
-        # Draw objects
-        for obj in objects:
-            obj.draw(screen)
-
-        # Check for collisions
-        player_rect = player.get_rect()
-        for obj in objects:
-            if player_rect.colliderect(obj.get_rect()):
-                running = False  # End the game on collision
-
-        # Scoring
-        score += 1 * score_multiplier  # Update score
-
-        # Display score
-        score_text = FONT.render(f'Score: {int(score)}', True, BLACK)
-        screen.blit(score_text, (10, 10))
-
-        # Update the display
+    def _update_ui(self):
+        self.screen.fill(WHITE)
+        self.player.draw(self.screen)
+        for obj in self.objects:
+            obj.draw(self.screen)
+        score_text = FONT.render('Score: {}'.format(int(self.score)), True, BLACK)
+        self.screen.blit(score_text, (10, 10))
         pygame.display.flip()
-
-        # Remove off-screen objects
-        objects = [obj for obj in objects if obj.y < SCREEN_HEIGHT]
-
-        # Cap the frame rate
-        clock.tick(60)
-
-    pygame.quit()
-
-if __name__ == "__main__":
-    main()
+        self.clock.tick(60)
