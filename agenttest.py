@@ -44,4 +44,30 @@ class Agent:
         else:
             # Default state if no object is found
             state = [0, 0, 1, 0]
+    def remember(self, state, action, reward, next_state, done):
+        self.memory.append((state, action, reward, next_state, done))
+
+    def train_long_memory(self):
+        if len(self.memory) > BATCH_SIZE:
+            mini_sample = random.sample(self.memory, BATCH_SIZE)
+        else:
+            mini_sample = self.memory
+
+        states, actions, rewards, next_states, dones = zip(*mini_sample)
+        self.trainer.train_step(states, actions, rewards, next_states, dones)
+
+    def train_short_memory(self, state, action, reward, next_state, done):
+        self.trainer.train_step(state, action, reward, next_state, done)
+
+    def get_action(self, state):
+        # Random moves: trade-off between exploration and exploitation
+        self.epsilon = 80 - self.n_games
+        if random.randint(0, 200) < self.epsilon:
+            action = random.randint(0, 1)
+        else:
+            state0 = torch.tensor(state, dtype=torch.float)
+            prediction = self.model(state0)
+            action = torch.argmax(prediction).item()
+
+        return action
     
