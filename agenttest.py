@@ -27,3 +27,21 @@ class Agent:
             if distance > 0 and distance < min_distance:
                 nearest_object = obj
                 min_distance = distance
+        if nearest_object is not None:
+            state = [
+                # Player's position (normalized)
+                game.player.x / SCREEN_WIDTH,
+                
+                # Nearest object's horizontal position (normalized)
+                nearest_object.x / SCREEN_WIDTH,
+                
+                # Nearest object's vertical distance from the player (normalized)
+                min_distance / SCREEN_HEIGHT,
+
+                # Nearest object's speed (normalized)
+                nearest_object.speed / OBJECT_MAX_SPEED
+            ]
+        else:
+            # Default state if no object is found
+            state = [0, 0, 1, 0]
+    
