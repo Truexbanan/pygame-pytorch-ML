@@ -4,7 +4,7 @@ from helper import plot
 
 def train():
     # Define game and agent parameters
-    input_size = 4 # Define based on your state representation
+    input_size = 8 # Define based on your state representation
     output_size = 2  # Two actions: left or right
     agent = Agent(input_size, output_size)
     game = GameAI()
