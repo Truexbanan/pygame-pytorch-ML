@@ -91,7 +91,7 @@ class GameAI:
 
         self.score += 1
         elapsed_time = time.time() - self.start_time
-        spawn_threshold = max(10, 30 - int(elapsed_time / 20))
+        spawn_threshold = max(10, 60 - int(elapsed_time / 20))
         if random.randint(1, spawn_threshold) == 1:
             self.objects.append(Object())
 
