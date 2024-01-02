@@ -3,12 +3,12 @@ import torch
 import random
 import numpy as np
 from collections import deque
-from game import OBJECT_MAX_SPEED, SCREEN_HEIGHT, SCREEN_WIDTH, GameAI  # Replace with your game module
+from game import OBJECT_MAX_SPEED, SCREEN_HEIGHT, SCREEN_WIDTH, GameAI 
 from model import Linear_QNet, QTrainer
 
-MAX_MEMORY = 100_000
-BATCH_SIZE = 1000
-LR = 0.001
+MAX_MEMORY = 10000
+BATCH_SIZE = 64
+LR = 0.0005
 
 class Agent:
     def __init__(self, input_size, output_size):
