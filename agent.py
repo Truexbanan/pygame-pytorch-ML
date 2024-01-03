@@ -19,6 +19,7 @@ class Agent:
         self.model = Linear_QNet(input_size, 256, output_size)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
         self.last_direction_change_time = time.time()
+        self.q_values_history = []
     
     def change_direction(self):
         # Call this method when the player changes direction
@@ -81,6 +82,12 @@ class Agent:
         self.trainer.train_step(state, action, reward, next_state, done)
 
     def get_action(self, state):
+
+
+        state0 = torch.tensor(state, dtype=torch.float)
+        prediction = self.model(state0)
+        q_value = torch.max(prediction).item()  # Get the maximum Q value
+        self.q_values_history.append(q_value)  # Store the Q value
         # Decay epsilon with a lower bound to ensure some level of exploration
         self.epsilon = max(self.epsilon * 0.99, 0.1)  # for example, decay epsilon by 1% each game, with a minimum of 0.1
         
